@@ -1,33 +1,27 @@
-const fs = require('fs');
+const fs = require("fs").promises;
 
-fs.readFile('data.json', 'utf8', (err, data) => {
-    if (err) {
-        console.error('Помилка читання JSON-файлу:', err);
-        return;
+async function minvalue(jsonData) {
+  let min = 10000;
+  let text = "";
+  for (let list of jsonData) {
+    if (list.value < min) {
+      min = list.value;
+      text = list.txt;
     }
+  }
+  return `${text}:${min}`;
+}
 
+async function main() {
+  try {
+    const data = await fs.readFile("data.json", "utf-8");
     const jsonData = JSON.parse(data);
+    const str = await minvalue(jsonData);
+    await fs.writeFile("output.txt", str);
+    console.log("Output.txt created successfully.");
+  } catch (err) {
+    console.error(err);
+  }
+}
 
- 
-    const minItem = jsonData.reduce((min, current) => (
-        current.value < min.value ? current : min
-    ));
-
-    const minText = minItem.txt;
-    const minValue = minItem.value;
-
-
-    const outputData = `Назва активу: ${minText}\nЗначення: ${minValue}\n`;
-
-    fs.writeFile('output.txt', outputData, 'utf8', (err) => {
-        if (err) {
-            console.error('Помилка запису до файлу output.txt:', err);
-            return;
-        }
-        console.log('Дані записано у файл output.txt успішно.');
-    });
-});
-
-
-
-
+main();
